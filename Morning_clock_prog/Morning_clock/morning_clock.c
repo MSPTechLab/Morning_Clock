@@ -18,9 +18,7 @@ typedef struct{
 	unsigned char minute;
 	unsigned char hour;
 	unsigned char week_day;
-	//    unsigned char date;
-	//    unsigned char month;
-	//    unsigned int year;
+	
 } time;
 
 time t;
