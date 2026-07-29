@@ -10,7 +10,7 @@
 FUSES =
 {
 	.low = 0xA4,		//Select cpu clk: Internal calibrated RC-oscillator @ 8MHz
-	.high = 0xC1,		
+	.high = 0xC0,		
 	//.extended = 0xE3,	//Default settings
 };
 
