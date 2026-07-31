@@ -2,7 +2,7 @@
 //This file stores main parameters and variables 
 //#############################################
 #ifndef MORNING_CLOCK_H
-#define MORNING_CLOCK_h
+#define MORNING_CLOCK_H
 
 #include <avr/io.h>
 #include "bits_macros.h"
@@ -51,11 +51,6 @@ unsigned char EEMEM brightness = BRIGHTNESS_INIT;
 unsigned char EEMEM indication_flag = 1;// 1 is constant indication, 0 -one 1 minute
 unsigned char EEMEM dawn_period = 25; //dawn period from 15 to 30 step 5
 unsigned char EEMEM week_day_al[7]={1,1,1,1,1,0,0}; //week days alarm set
-
-#define DRV_PORT PORTC
-#define DRV_DDR DDRC
-#define DRV_CONN 0b00001111
-
 
 
 

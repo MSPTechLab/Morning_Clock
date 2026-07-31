@@ -1,6 +1,6 @@
 // SignallerK 2019 -v 1.4.0
 //added back_up battery control
-//corrected small bugs and refactored code
+//corrected small bugs and re factored code
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -38,7 +38,7 @@ uint8_t PWM_SEC_Counter=0;
 
 //set indication and brightness
 uint8_t indication_counter=indication_period;//sec
-volatile uint8_t brightness_counter=BRIGHTNESS_INIT;
+volatile uint8_t brightness_counter;
 uint8_t update_display_flag=1;
 //buttons variables
 uint8_t m_pressed = 0, h_pressed=0; //button is pressed
@@ -144,6 +144,8 @@ int main(void)
 	// waiting for timer readiness.
 	while (ASSR & ((1<<TCN2UB) | (1<<OCR2UB) | (1<<TCR2UB)));
 
+	//init counter
+	brightness_counter = eeprom_read_byte(&brightness);
 	// Timer 2 interrupts on.
 	TIMSK |= (1<<TOIE2);
 	// Timer 0 interrupts on
@@ -450,8 +452,10 @@ ISR(TIMER0_OVF_vect)
 		}
 		
 	}
+	
 	//Button check main cycle
 	if (++button_delay==BUTTON_DELAY_CONST) // around 0.4 sec for fixed value
+	
 	{
 		button_delay=0;
 		update_display_flag=1;
@@ -475,12 +479,12 @@ ISR(TIMER0_OVF_vect)
 			}
 			else if (menu==Alarm)
 			{
-				eeprom_write_byte(&dawn_hour, eeprom_read_byte(&dawn_hour)+1);
-				
-				if (eeprom_read_byte(&dawn_hour)==24)//correct alarm hour
+				uint8_t value = eeprom_read_byte(&dawn_hour)+1;
+				if (value==24)//correct alarm hour
 				{
-					eeprom_write_byte(&dawn_hour,0);
+					value=0;
 				}
+				eeprom_update_byte(&dawn_hour, value);
 			}
 		}
 		if (m_pressed&&menu_unpressed&&!(h_pressed)) //if minute button pressed
@@ -495,10 +499,13 @@ ISR(TIMER0_OVF_vect)
 				}
 				break;
 				case Alarm: //correct alarm minute
-				eeprom_write_byte(&dawn_minute, eeprom_read_byte(&dawn_minute)+1);
-				if (eeprom_read_byte(&dawn_minute)==60)
 				{
-					eeprom_write_byte(&dawn_minute,0);
+					uint8_t value = eeprom_read_byte(&dawn_minute)+1;
+					if (value==60)
+					{
+						value=0;
+					}
+					eeprom_update_byte(&dawn_minute, value);
 				}
 				break;
 				//set day
@@ -516,13 +523,9 @@ ISR(TIMER0_OVF_vect)
 				case Al_Fri:
 				case Al_Sut:
 				case Al_Sun:
-				if (eeprom_read_byte(&week_day_al[menu-Al_Mon]))//set day alarms
 				{
-					eeprom_write_byte(&week_day_al[menu-Al_Mon],0);
-				}
-				else
-				{
-					eeprom_write_byte(&week_day_al[menu-Al_Mon],1);
+					uint8_t value = eeprom_read_byte(&week_day_al[menu-Al_Mon]) ? 0 : 1;//set day alarms
+					eeprom_update_byte(&week_day_al[menu-Al_Mon], value);
 				}
 				break;
 				//correct brightness
@@ -530,34 +533,38 @@ ISR(TIMER0_OVF_vect)
 				
 				ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 				{
-					if (eeprom_read_byte(&brightness)+1==3)
+					uint8_t value = eeprom_read_byte(&brightness)+1;
+					if (value==3)
 					{
-						eeprom_write_byte(&brightness,1);
+						value=1;
 					}
-					else
-					eeprom_write_byte(&brightness, eeprom_read_byte(&brightness)+1);
+					eeprom_update_byte(&brightness, value);
 					
 					brightness_counter=2;
 				}
 				break;
 				//set indication 1- constant, 0- 60 sec
 				case Indication:
-				eeprom_write_byte(&indication_flag, eeprom_read_byte(&indication_flag)+1);
-				if (eeprom_read_byte(&indication_flag)==2)//set indication time
 				{
-					eeprom_write_byte(&indication_flag,0);
-					
+					uint8_t value = eeprom_read_byte(&indication_flag)+1;
+					if (value==2)//set indication time
+					{
+						value=0;
+					}
+					eeprom_update_byte(&indication_flag, value);
 				}
 				break;
 				//set dawn period
 				case Dawn_Time:
-				eeprom_write_byte(&dawn_period, eeprom_read_byte(&dawn_period)+5);
-				if (eeprom_read_byte(&dawn_period)>30)//correct brightness
 				{
-					eeprom_write_byte(&dawn_period, 15);
-					
+					uint8_t value = eeprom_read_byte(&dawn_period)+5;
+					if (value>30)//correct dawn period
+					{
+						value=15;
+					}
+					eeprom_update_byte(&dawn_period, value);
+					dawn_step = ((((uint16_t)value)*60)+PWM_TOP/2)/PWM_TOP;
 				}
-				dawn_step = ((((uint16_t)eeprom_read_byte(&dawn_period))*60)+PWM_TOP/2)/PWM_TOP;
 				break;
 				default:
 				break;
@@ -567,6 +574,7 @@ ISR(TIMER0_OVF_vect)
 		
 		
 		if (h_pressed&&m_pressed&&menu_unpressed) //alarm turn off/on (2 buttons)
+		
 		{
 			if(menu==Clock||menu==Alarm)
 			{

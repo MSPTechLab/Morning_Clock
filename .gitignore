@@ -1,1 +1,9 @@
 Debug/
+AGENTS.md
+
+# Atmel Studio / Visual Studio local state
+.vs/
+*.atsuo
+
+# Local Proteus/backup state
+*.pdsbak
