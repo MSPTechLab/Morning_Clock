@@ -51,6 +51,7 @@ unsigned char EEMEM brightness = BRIGHTNESS_INIT;
 unsigned char EEMEM indication_flag = 1;// 1 is constant indication, 0 -one 1 minute
 unsigned char EEMEM dawn_period = 25; //dawn period from 15 to 30 step 5
 unsigned char EEMEM week_day_al[7]={1,1,1,1,1,0,0}; //week days alarm set
+int8_t EEMEM time_correction = 0; // time correction in seconds (-15 to +15)
 
 
 
@@ -64,7 +65,9 @@ enum seg_nick_name {
 	seg_to_I=15,
 	seg_to_n=16,
 	seg_to_P=17,
-	seg_to_void=18
+	seg_to_void=18,
+	seg_to_C=19,
+	seg_to_dash=20
 	};
 uint8_t segment[] =
 //pgfedcba+some symbols
@@ -87,7 +90,9 @@ uint8_t segment[] =
 	0b00110000,		//I
 	0b01010100,		//n
 	0b01110011,		//P
-	0b00000000		//void _
+	0b00000000,		//void _
+	0b00111011,     //C
+	0b01000000      //-
 };
 
 // menu types enum
@@ -106,7 +111,7 @@ enum menu_item
 	Bright,
 	Indication,
 	Dawn_Time,
-	//TBD correction
+	Time_Correction,
 	MENU_END
 
 } menu;

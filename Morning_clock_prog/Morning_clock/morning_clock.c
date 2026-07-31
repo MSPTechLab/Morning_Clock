@@ -219,6 +219,22 @@ int main(void)
 					digits[1]=seg_to_P;//P
 					BIN2BCD(digits+2,eeprom_read_byte(&dawn_period));
 					break;
+					case Time_Correction:
+					{
+						int8_t corr = (int8_t)eeprom_read_byte((const uint8_t *)&time_correction);
+						digits[0]=seg_to_C;
+						if (corr<0)
+						{
+							digits[1]=seg_to_dash;
+							BIN2BCD(digits+2,(uint8_t)(-corr));
+						}
+						else
+						{
+							digits[1]=seg_to_void;
+							BIN2BCD(digits+2,(uint8_t)corr);
+						}
+					}
+					break;
 					
 					default:
 					menu=Clock;
@@ -353,6 +369,47 @@ ISR(TIMER2_OVF_vect) //overflow interrupt vector
 					TCCR1A=0x81; //turn on timer
 				}
 			}
+		}
+		
+		// Daily time correction check at 03:00:00
+		static uint8_t corrected_today = 0;
+		if (t.hour == 3 && t.minute == 0 && t.second == 0)
+		{
+			if (!corrected_today)
+			{
+				corrected_today = 1;
+				int8_t corr = (int8_t)eeprom_read_byte((const uint8_t *)&time_correction);
+				if (corr != 0)
+				{
+					int16_t s = (int16_t)t.second + corr;
+					if (s >= 60)
+					{
+						t.second = s - 60;
+						t.minute++;
+					}
+					else if (s < 0)
+					{
+						t.second = 60 + s;
+						if (t.minute == 0)
+						{
+							t.minute = 59;
+							t.hour--;
+						}
+						else
+						{
+							t.minute--;
+						}
+					}
+					else
+					{
+						t.second = s;
+					}
+				}
+			}
+		}
+		else
+		{
+			corrected_today = 0;
 		}
 	}
 }
@@ -564,6 +621,16 @@ ISR(TIMER0_OVF_vect)
 					}
 					eeprom_update_byte(&dawn_period, value);
 					dawn_step = ((((uint16_t)value)*60)+PWM_TOP/2)/PWM_TOP;
+				}
+				break;
+				case Time_Correction:
+				{
+					int8_t val = (int8_t)eeprom_read_byte((const uint8_t *)&time_correction) + 1;
+					if (val > 15)
+					{
+						val = -15;
+					}
+					eeprom_update_byte((uint8_t *)&time_correction, (uint8_t)val);
 				}
 				break;
 				default:
