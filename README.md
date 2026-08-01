@@ -38,10 +38,11 @@ Modes are given in switching order, and are changed by pressing **Set** button.
   * **M/D button** - press to set Indication - 1 constant, 0- 60 second.
   * **H button or M/D button** - shot press to turn on display.
 * Dawn Period -**dP25** - dawn period - from 15 to 30 minutes with step 5 minutes.
-  * **M/D button** - press to set dawn period
+   * **M/D button** - press to set dawn period
+* Time Correction - **C 00** - daily time correction from -15 to +15 seconds (step 1 sec). Automatically applied once a day at 03:00:00.
+   * **M/D button** - press to cycle correction value (-15 to +15).
 ### Global buttons operations
 * When alarm is working (light is turned on) is can be switched off by short press of **H button or M/D button**.
 * Press **H button or M/D button** to turn on display when indication mode 0 is selected.
 ## TBD (probably will be added):
 * Add speaker and make beeps when alarm time is on (**!**  Is not supported by current pcb);
-* Add time correction per day.
