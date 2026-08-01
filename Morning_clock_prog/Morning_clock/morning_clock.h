@@ -70,7 +70,24 @@ enum seg_nick_name {
 	seg_to_dash=20
 	};
 uint8_t segment[] =
-//pgfedcba+some symbols
+
+/*
+   7-segment display labels
+
+     ---a---
+    |       |
+    f       b
+    |       |
+     ---g---
+    |       |
+    e       c
+    |       |
+     ---d---   dp
+
+   Bit order example:
+   bit:  7 6 5 4 3 2 1 0
+         dp g f e d c b a
+*/
 {
 	0b00111111,     //0
 	0b00000110,     //1
@@ -91,7 +108,7 @@ uint8_t segment[] =
 	0b01010100,		//n
 	0b01110011,		//P
 	0b00000000,		//void _
-	0b00111011,     //C
+	0b00111001,     //C
 	0b01000000      //-
 };
 
